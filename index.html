@@ -7,38 +7,42 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <style type="text/css">
+        /* reset & 基础风格 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* 整体页面结构优化：使背景图片完整覆盖，同时保证底部备案号可见且不影响原有动画 */
+        /* 主体结构：保留原有背景图片 + 黑色底色 + 固定背景附着，移除原先可能导致fixed异常的absolute定位 */
         body {
             background-color: black;
-            /* 保持原有背景图片: 固定在顶部，no-repeat，并保证覆盖整个视区 */
+            /* 保持原图片路径及核心视觉：背景图片固定顶部居中，铺满整个视口（cover保证无变形留白） */
             background-image: url(UI/img/cat.jpg);
             background-repeat: no-repeat;
             background-attachment: fixed;
-            background-position: top center;   /* 原 top，增强居中表现 */
-            background-size: cover;            /* 保证图片比例覆盖，避免留白，同时不破坏猫图冲击力 */
+            background-position: top center;
+            background-size: cover;       /* 让猫咪背景图完美覆盖，适应不同屏幕，底部自然延伸出图片视觉底部 */
             width: 100%;
             min-height: 100vh;
+            /* 移除原来的 position:absolute，保证fixed元素相对视口定位，且文档流正常滚动 */
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;       /* 内容从顶部开始，保留h1与p的位置 */
+            /* 让内容区自然撑开，底部留出安全距离给备案号，避免内容被遮盖（贴底但不会覆盖主要文字） */
+            padding-bottom: 56px;
         }
 
-        /* 文字容器--为了精准控制层次，但仍保持原有动画与位置习惯 */
+        /* 文字主容器：保留原有动画和风格，由相对布局控制，确保中心内容优雅展示 */
         .hero-text {
             position: relative;
             width: 100%;
-            padding-top: 2rem;     /* 轻柔的内边距，适应移动端 */
+            padding-top: 2.5rem;
             z-index: 2;
+            flex: 1;          /* 占满剩余空间，让备案号自然贴底，但备案号使用fixed方式更“贴底”，同时防止内容过短时留白奇怪 */
         }
 
-        /* 保留原 h1 动画、颜色、居中样式，同时增加细微文字阴影保证可读性 */
+        /* h1 原有动画 + 样式增强 (保留原字体大小、颜色、动画时长) */
         h1 {
             color: white;
             font-size: 35px;
@@ -46,70 +50,80 @@
             width: 100%;
             text-align: center;
             animation: h1 10s ease forwards;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
             letter-spacing: 1px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
             margin: 0;
+            line-height: 1.3;
         }
 
-        /* 保留原 p1 样式，但作为第一个描述句 */
+        /* p1 原有动画 + 妙趣横生样式 */
         #p1 {
             color: white;
             font-size: 20px;
             position: relative;
             width: 100%;
-            top: 0px;                /* 原 top:60px 相对于绝对定位，现改为相对布局保持流式 */
-            margin-top: 0.75rem;     /* 提供与原top类似的间距效果，同时不破坏绝对定位偏移问题 */
             text-align: center;
+            margin-top: 1rem;
             animation: p1 10s ease forwards;
-            text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            font-weight: 400;
         }
 
-        /* 底部备案号容器 —— 图片底部固定文案 */
-        .record-footer {
+        /* 备案号模块 —— 完全贴底 (fixed 相对于视窗底部, 紧贴底部) 
+           同时添加点击新开页面跳转至工信部备案官网，且符合备案规范交互 */
+        .beian-footer {
             position: fixed;
-            bottom: 16px;
+            bottom: 0;
             left: 0;
             width: 100%;
             text-align: center;
-            z-index: 20;
+            z-index: 100;
+            padding: 10px 16px;
+            background: rgba(0, 0, 0, 0.65);          /* 半透明深色底纹，确保在任何背景图片下清晰可读 */
+            backdrop-filter: blur(6px);               /* 毛玻璃效果，精致且不影响阅读 */
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.2s ease;
             font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background-color: rgba(0, 0, 0, 0.55);   /* 半透明底衬，确保无论图片亮部暗部都清晰可见 */
-            backdrop-filter: blur(3px);              /* 轻微毛玻璃效果，提升精致感 */
-            padding: 8px 12px;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            letter-spacing: 0.5px;
-            transition: opacity 0.3s;
         }
 
-        .record-text {
-            color: #f0f0f0;
-            font-size: 14px;
-            font-weight: 400;
-            text-decoration: none;
+        /* 备案号链接样式：保持视觉为文本，可点击，新标签页打开且不遗漏安全提示 */
+        .beian-link {
             display: inline-block;
-            opacity: 0.92;
-            transition: opacity 0.2s;
-            cursor: default;
-            /* 若需要可点击链接，保留指示，但备案号通常无链接，但符合规范添加微交互 */
+            color: #eaeef5;
+            font-size: 14px;
+            font-weight: 450;
+            text-decoration: none;
+            letter-spacing: 0.8px;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+            border: 0.5px solid rgba(255, 255, 255, 0.2);
         }
 
-        .record-text:hover {
-            opacity: 1;
-            text-shadow: 0 0 2px rgba(255,255,255,0.5);
+        /* hover 提升交互感，同时表明可点击跳转 */
+        .beian-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 3px rgba(255,255,255,0.5);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
         }
 
-        /* 针对短屏或者小屏设备，防止底部备案号遮挡主要文字过近，增加body底部内边距 (但fixed不占文档流, 增加底部安全空间) */
-        @media (max-width: 600px) {
-            body {
-                padding-bottom: 60px;  /* 给底部备案号预留舒适空间，不会覆盖主体内容操作区 */
+        .beian-link:active {
+            transform: translateY(1px);
+        }
+
+        /* 为了适配移动端让底部安全，同时保证触控区域舒适 */
+        @media (max-width: 640px) {
+            .beian-footer {
+                padding: 8px 12px;
             }
-            .record-footer {
-                bottom: 8px;
-                padding: 6px 10px;
-            }
-            .record-text {
+            .beian-link {
                 font-size: 12px;
+                padding: 5px 14px;
             }
             h1 {
                 font-size: 28px;
@@ -117,50 +131,61 @@
             #p1 {
                 font-size: 18px;
             }
+            body {
+                padding-bottom: 52px;
+            }
         }
 
-        /* 针对较高屏幕，底部始终可见，内容区域自然滚动时，原有动画不受影响 */
-        /* 保留原本定义的keyframes */
+        /* 针对刘海屏或全面屏增加安全区适配（iOS 等） */
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .beian-footer {
+                padding-bottom: calc(10px + env(safe-area-inset-bottom));
+                padding-left: calc(16px + env(safe-area-inset-left));
+                padding-right: calc(16px + env(safe-area-inset-right));
+            }
+            body {
+                padding-bottom: calc(56px + env(safe-area-inset-bottom));
+            }
+        }
+
+        /* 定义原有动画，微调增强平滑度 */
         @keyframes h1 {
-            0% { opacity: 0; transform: translateY(8px); }
+            0% { opacity: 0; transform: translateY(12px); }
             100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes p1 {
-            0% { opacity: 0; transform: translateY(6px); }
+            0% { opacity: 0; transform: translateY(8px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* 原有绝对定位方式会破坏其他元素的文档流，改回相对定位保留原始视觉但避免覆盖备案号区域。
-           由于原body中width/height/position:absolute会限制滚动和布局，移除可能导致子元素fixed参照系异常。
-           依照原有设计，body不应设置position:absolute，否则fixed元素相对于body定位会有问题。
-           原代码 body 中 position:absolute 会使 .record-footer 基于body定位而不是视口，并且背景固定机制奇异。
-           变更说明：移除 body 原有的 position:absolute；保留背景fixed以及宽高100%自然流式，确保备案号基于视口固定。
-           故以下样式做关键修复——让背景完美且保留图片底部文字。 */
-        /* 完全保留原始样式背景特性，同时修正绝对定位带来的滚动/层级隐患 */
-        /* 注意：原始 HTML 中 body 样式有 position:absolute，这会破坏自然滚动并让固定底部失效，必须覆盖为更加合理的样式。
-           为了尊重需求，在不影响原有图片展示和动画前提下，优化实现备案号图片底部可见。并且背景图片显示效果几乎一致。
-           同时为了安全，保留用户所有原始视觉元素：黑色背景+cat.jpg+动画+“TTBigCat”+“妙趣横生”。
-           因原始图片路径UI/img/cat.jpg为演示路径，此处不做修改。下面通过调整body样式让其正常工作。 */
+        /* 保留兼容与原汁原味的视觉层次，背景图片始终为猫 + 黑色氛围 */
+        /* 附加细节：确保滚动时主要内容不会被备案号遮挡, 因为备案号fixed贴底，页面最后的内容由padding-bottom预留空间 */
+        /* 如果内容极少，布局依然保持优雅，背景图片完整可见，备案号浮动于底部但半透明不会喧宾夺主 */
     </style>
-    <!-- 段落修正：确保保留原有结构且不丢失任何原有元素 -->
 </head>
 <body>
-    <!-- 保留原有文字内容结构，以维持h1与p1的动画和定位 -->
+    <!-- 原有的文字核心区完全保留：标题与描述，动画与原风格一致 -->
     <div class="hero-text">
         <h1>TTBigCat</h1>
         <p id="p1">妙趣横生</p>
     </div>
 
-    <!-- 图片底部添加备案号：粤ICP备2021168944号-1 (固定在页面底部，相当于图片最底部位置) 
-         设计含义：因为背景图片覆盖整个视口，用户视觉上图片的“底部”便是浏览器底部，因此fixed底部合理体现图片底部文案。
-         如果背景图片高度大于视窗，滚动时仍可见备案号浮于图片底部且始终跟随屏幕底部，符合广义图片底部加文本需求。
-         同时可确保在任何滚动场景下，备案号位于浏览器视口最底部，即图片内容的末端位置。
-    -->
-    <div class="record-footer">
-        <span class="record-text">备案号：粤ICP备2021168944号-1</span>
+    <!-- 备案号区域：完全贴着底部，且点击后新开页面跳转到工信部备案官网（ICP备案查询官方地址） 
+         根据需求 “粤ICP备2021168944号-1” 点击打开 https://beian.miit.gov.cn/#/Integrated/index 
+         新开页面采用 target="_blank" rel="noopener noreferrer" 保证安全性 -->
+    <div class="beian-footer">
+        <a href="https://beian.miit.gov.cn/#/Integrated/index" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="beian-link"
+           title="点击前往工信部备案管理系统查询">
+            备案号：粤ICP备2021168944号-1
+        </a>
     </div>
 
-    <!-- 确保原本可能存在的绝对定位样式不再干扰，已覆盖。并且背景url不变，动画不变。
-         额外细节：针对移动端触摸、设备兼容，同时保留所有原始meta与icon -->
+    <!-- 原有body去除了绝对定位，背景依然固定，动画仍然流畅，备案号完全贴着底部并且可点击新页面。
+         保留所有原始元素，无任何删除，并且背景图片为UI/img/cat.jpg，提高语义和视觉魅力。
+         同时确保响应式，在移动端和PC端底部始终贴合，且链接可正常打开新窗口。
+         完全满足用户要求: 图片底部加上文本备案号，贴着底部，点击新开页面至指定工信部地址 -->
 </body>
 </html>
